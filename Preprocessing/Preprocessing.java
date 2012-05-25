@@ -25,27 +25,28 @@ public class Preprocessing {
     private int currentUserRatingCount;
     private int currentUserRatingSum;
     private Chunk[] chunks;
-    
+
     public Preprocessing(String inFile, String outFilePrefix, int numberOfChunks, int numberOfSongs) {
         this.inFile = inFile;
         this.outFilePrefix = outFilePrefix;
         this.numberOfChunks = numberOfChunks;
-        this.numberOfSongsPerChunk = (int) Math.ceil(numberOfSongs/((double)numberOfChunks));
+        this.numberOfSongsPerChunk = (int) Math.ceil(numberOfSongs / ((double) numberOfChunks));
         chunks = new Chunk[numberOfChunks];
-        
-        for (int i = 0; i < numberOfChunks; i++)
-            chunks[i] = new Chunk(outFilePrefix + i);
-        
+
+        for (int i = 0; i < numberOfChunks; i++) {
+            chunks[i] = new Chunk(outFilePrefix + i + ".txt");
+        }
+
         try {
             file = new FileInputStream(inFile);
         } catch (FileNotFoundException e) {
             System.err.println("Database file " + inFile + " not found.");
             System.exit(1);
-        }        
+        }
         scan = new Scanner(file);
-        
+
     }
-    
+
     public void close() {
         scan.close();
         try {
@@ -54,12 +55,14 @@ public class Preprocessing {
             System.err.println("Unable to close database file " + inFile + "\n" + ex);
             System.exit(1);
         }
+        
+        for (Chunk chunk : chunks)
+            chunk.close();
     }
-    
-    
+
     public void parse() {
         while (scan.hasNext()) {
-            String line = scan.next();
+            String line = scan.nextLine();
             if (line.contains("|")) {
                 printChunks(currentUserLine + "|" + currentUserAverageRating());
                 currentUserLine = line;
@@ -67,15 +70,26 @@ public class Preprocessing {
                 currentUserRatingSum = 0;
             } else {
                 int[] songAndRating = strArrayToIntArray(line.split("\t"));
-                chunks[songAndRating[0] / numberOfSongsPerChunk].addSongRating(line);
+                if (songAndRating.length != 2) {
+                    System.err.println("Song line did not have two elements on it: " + line);
+                    System.exit(1);
+                }
+                try {
+                    chunks[songAndRating[0] / numberOfSongsPerChunk].addSongRating(line);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.err.println("Tried to write to " + songAndRating[0] / numberOfSongsPerChunk + "\n" + e);
+                    System.exit(1);
+                }
+
                 currentUserRatingSum += songAndRating[1];
                 currentUserRatingCount++;
             }
 
         }
+        printChunks(currentUserLine + "|" + currentUserAverageRating());
 
     }
-     
+
     private static int[] strArrayToIntArray(String[] line) {
         int[] infoLine = new int[line.length];
         for (int i = 0; i < line.length; i++) {
@@ -84,12 +98,12 @@ public class Preprocessing {
         }
         return infoLine;
     }
-    
+
     private double currentUserAverageRating() {
-        return ((double)currentUserRatingSum) / currentUserRatingCount;
-        
+        return ((double) currentUserRatingSum) / currentUserRatingCount;
+
     }
-    
+
     private void printChunks(String userLine) {
         for (Chunk chunk : chunks) {
             chunk.printSongs(userLine);

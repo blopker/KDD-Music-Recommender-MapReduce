@@ -17,14 +17,16 @@ import java.util.logging.Logger;
  * @author sarah
  */
 public class Chunk {
-    BufferedWriter out;
-    ArrayList<String> currentUserSongRatings;
-    String filename;
-    boolean shouldPrint;
+    private FileWriter fileWriter;
+    private BufferedWriter out;
+    private ArrayList<String> currentUserSongRatings;
+    private String filename;
+    private boolean shouldPrint;
     
     public Chunk(String filename) {
         try {
-            out = new BufferedWriter(new FileWriter(filename));
+            fileWriter = new FileWriter(filename);
+            out = new BufferedWriter(fileWriter);
         } catch (IOException e) {
             System.err.println("Failed to create chunk for file: " + filename);
             System.exit(1);
@@ -41,17 +43,30 @@ public class Chunk {
     public void printSongs(String userLine) {
         if (!shouldPrint)
             return;
-        
+
         try {
             out.write(userLine);
-            for (String songLine : currentUserSongRatings)
+            out.write("\n");
+            for (String songLine : currentUserSongRatings) {
                 out.write(songLine);
+                out.write("\n");
+            }
         } catch (IOException ex) {
             System.err.println("Failed to print song info to chunk " + filename + ": " + userLine + "\n" + ex);
         }
         
         currentUserSongRatings = new ArrayList();
         shouldPrint = false;
+    }
+    
+    public void close() {
+        try {
+            out.close();
+            fileWriter.close();
+        } catch (IOException ex) {
+            System.err.println("Unable to close files for chunk " + filename + "\n" + ex);
+            System.exit(1);
+        }
     }
     
 }
