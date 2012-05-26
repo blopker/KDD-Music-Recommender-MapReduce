@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package preprocessing;
+package Preprocessing;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
