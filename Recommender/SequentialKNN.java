@@ -5,11 +5,15 @@
 
 package Recommender;
 
+import Database.KDDParser;
+import Database.Parser;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Database.Primitives.User;
 import Database.Songs;
 import Database.Users;
+import Main.KNNOptions;
+import Main.Main;
 /**
  *
  * @author sarahejones, sns
@@ -18,12 +22,20 @@ public class SequentialKNN implements Recommender{
     private final int RATING_COUNT_THRESHOLD = 1;
      /* could precompute  this w/ map reduce: finding k nearest neighbors */
     @Override
-    public void createNeighborhoods(Songs items, Users users, int k) {
+    public void createNeighborhoods() {
+        // initalize lists.
+        int k = Main.getOptions().getK();
+        Parser parser = new KDDParser(Main.getOptions().getDatabasePath());
+
+        Songs songs = new Songs();
+        Users users = new Users();
+        parser.parse(songs, users);
+        
     //forall items i  //ith iteration
-        for (Song i: items) {
+        for (Song i: songs) {
 
     //    forall items j  //split this into N parts
-            for (Song j : items) {
+            for (Song j : songs) {
                 double numerator = 0, denominator_left = 0, denominator_right = 0;
         
                 if (j.equals(i)) 
