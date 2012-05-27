@@ -6,8 +6,11 @@ import Database.Parser;
 import Database.Primitives.User;
 import Database.Songs;
 import Database.Users;
+import Preprocessing.Preprocessing;
+import Recommender.ParallelKNN;
 import Recommender.Recommender;
 import Recommender.SequentialKNN;
+import java.util.List;
 import java.util.Scanner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -34,19 +37,11 @@ public class Main {
         CmdLineParser parser = new CmdLineParser(options);
         try {
             parser.parseArgument(args);
-
+            run();
         } catch (CmdLineException ex) {
             usage(parser);
             commandLineError(ex);
-        } 
-        try {
-            run();
-        } catch (IndexOutOfBoundsException ex) {
-            System.err.println("Array Index error");
-            usage(parser);
         }
-        
-
     }
 
     private static void commandLineError(CmdLineException ex) {
@@ -56,14 +51,14 @@ public class Main {
     }
 
     private static void usage(CmdLineParser parser) {
-        System.out.println("Usage:\njava -jar KDD-Music-Recommender.jar -k N DATABASE\njava -jar KDD-Music-Recommender.jar -q -t D -n NEIGHBOR_FILE DATABASE");
+        System.out.println(options.USAGE);
         parser.printUsage(System.out);
         System.exit(1);
     }
 
     private static void run() {
         Recommender recommender = getRecommender();
-        // Are we in calc or query mode?
+        // What mode are we in?
         switch (options.getMode()) {
             case CALC:
                 calculate(recommender);
@@ -71,24 +66,29 @@ public class Main {
             case QUERY:
                 query(recommender);
                 break;
+            case PRE:
+                preprocess();
             default:
                 break;
         }
     }
 
-    // Stub, change to dynamically switch to parallel calculation.
+    // Dynamically switch recommenders based on mode.
     private static Recommender getRecommender() {
-        return new SequentialKNN();
+        Recommender recco;
+        switch (options.getMode()) {
+            case PARALLEL:
+                recco = new ParallelKNN();
+                break;
+            default:
+                recco = new SequentialKNN();
+                break;
+        }
+        return recco;
     }
 
     private static void calculate(Recommender recommender) {
-        Parser parser = new KDDParser(options.getDatabasePath());
-
-        Songs songs = new Songs();
-        Users users = new Users();
-        parser.parse(songs, users);
-
-        recommender.createNeighborhoods(songs, users, options.getK());
+        recommender.createNeighborhoods();
     }
 
     private static void query(Recommender recommender) {
@@ -116,5 +116,12 @@ public class Main {
             System.out.println("Enter user id");
         }
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private static void preprocess() {
+        List<String> list = options.getArgumentList();
+        Preprocessing pp = new Preprocessing(list.get(0), list.get(1), Integer.parseInt(list.get(2)), Integer.parseInt(list.get(3)));
+        pp.parse();
+        pp.close();
     }
 }

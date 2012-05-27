@@ -15,7 +15,7 @@ import Database.Users;
 public class ParallelKNN implements Recommender{
 
     @Override
-    public void createNeighborhoods(Songs items, Users users, int k) {
+    public void createNeighborhoods() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
