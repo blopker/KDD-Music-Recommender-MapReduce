@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package Database;
+package Database.Parallel;
 import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.*;
@@ -14,14 +14,16 @@ import org.apache.hadoop.util.*;
  *
  * @author sarahejones
  */
-public class ObjUserIndexedRecordReader implements RecordReader<Text, Point3D> {
+public class ChunkRecordReader implements RecordReader<Text, Chunk> {
 
 
   private LineRecordReader lineReader;
   private LongWritable lineKey;
   private Text lineValue;
 
-  public ObjUserIndexedRecordReader(JobConf job, FileSplit split) throws IOException {
+  
+  //Bo: this is stolen code that will definitely have to be tossed, but we left it in case it was of help
+  public ChunkRecordReader(JobConf job, FileSplit split) throws IOException {
     lineReader = new LineRecordReader(job, split);
 
     lineKey = lineReader.createKey();

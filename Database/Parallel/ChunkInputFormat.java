@@ -3,7 +3,8 @@
  * and open the template in the editor.
  */
 
-package Database;
+package Database.Parallel;
+import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.io.*;
@@ -13,16 +14,21 @@ import org.apache.hadoop.util.*;
  *
  * @author sarahejones
  */
-public class UserIndexedInputFormat extends
-    FileInputFormat<Text, Point3D> {
+public class ChunkInputFormat implements InputFormat<Text, Chunk> {
 
 
-  public RecordReader<Text, Point3D> getRecordReader(
+    @Override
+  public RecordReader<Text, Chunk> getRecordReader(
       InputSplit input, JobConf job, Reporter reporter)
       throws IOException {
 
     reporter.setStatus(input.toString());
-    return new ObjPosRecordReader(job, (FileSplit)input);
+    return new ChunkRecordReader(job, (FileSplit)input);
   }
+
+    @Override
+    public InputSplit[] getSplits(JobConf jc, int i) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 }

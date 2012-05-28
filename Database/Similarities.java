@@ -8,14 +8,18 @@ package Database;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Main.Main;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.apache.hadoop.io.Writable;
 
 /**
  *
  * @author sarahejones, sns
  */
-public class Similarities {
+public class Similarities  {
     private int k;
     private ArrayList<Similarity> neighbors;
 
@@ -55,4 +59,5 @@ public class Similarities {
                 return true;
         return false;
     }
+
 }
