@@ -13,6 +13,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import org.apache.hadoop.io.Writable;
 
 /**
@@ -58,6 +59,10 @@ public class Similarities  {
             if (song.getID() == sim.getNeighborSong().getID())
                 return true;
         return false;
+    }
+    
+    public Iterator<Similarity> iterator() {
+        return neighbors.iterator();
     }
 
 }
