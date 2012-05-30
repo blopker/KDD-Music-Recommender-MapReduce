@@ -1,11 +1,7 @@
 package Main;
 
-import Database.KDDParser;
-import Database.NeighborhoodParser;
-import Database.Parser;
 import Database.Primitives.User;
-import Database.Songs;
-import Database.Users;
+import Database.*;
 import Preprocessing.Preprocessing;
 import Recommender.ParallelKNN;
 import Recommender.Recommender;
@@ -61,6 +57,7 @@ public class Main {
         // What mode are we in?
         switch (options.getMode()) {
             case CALC:
+                System.out.println("hi");
                 calculate(recommender);
                 break;
             case QUERY:
@@ -75,16 +72,7 @@ public class Main {
 
     // Dynamically switch recommenders based on mode.
     private static Recommender getRecommender() {
-        Recommender recco;
-        switch (options.getMode()) {
-            case PARALLEL:
-                recco = new ParallelKNN();
-                break;
-            default:
-                recco = new SequentialKNN();
-                break;
-        }
-        return recco;
+        return options.isParallel()?new ParallelKNN():new SequentialKNN();
     }
 
     private static void calculate(Recommender recommender) {

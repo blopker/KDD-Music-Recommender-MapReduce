@@ -49,7 +49,6 @@ public class KNNOptions {
         Mode mode = Mode.CALC;
         mode = (query)?Mode.QUERY:mode;
         mode = (preprocess)?Mode.PRE:mode;
-        mode = (parallel)?Mode.PARALLEL:mode;
         return mode;
     }
     
@@ -63,6 +62,10 @@ public class KNNOptions {
 
     public int getK() {
         return k;
+    }
+    
+    public boolean isParallel(){
+        return parallel;
     }
 
     public String getNeighborhoodFilePath() {
