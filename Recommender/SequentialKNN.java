@@ -30,6 +30,7 @@ public class SequentialKNN implements Recommender{
         Songs songs = new Songs();
         Users users = new Users();
         parser.parse(songs, users);
+        parser.close();
         
     //forall items i  //ith iteration
         for (Song i: songs) {

@@ -5,12 +5,17 @@
 
 package Database.Primitives;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.apache.hadoop.io.Writable;
+
 
 /**
  *
  * @author sarahejones, sns
  */
-public class Similarity implements Comparable<Similarity> {
+public class Similarity implements Comparable<Similarity>, Writable {
     private Song neighbor;
     private double similarity;
 
@@ -33,6 +38,18 @@ public class Similarity implements Comparable<Similarity> {
             return 1;
         else
             return -1;
+    }
+
+    @Override
+    public void write(DataOutput d) throws IOException {
+        d.writeInt(neighbor.getID());
+        d.writeDouble(similarity);
+    }
+
+    @Override
+    public void readFields(DataInput di) throws IOException {
+        neighbor = new Song(di.readInt());
+        similarity = di.readDouble();
     }
 
 

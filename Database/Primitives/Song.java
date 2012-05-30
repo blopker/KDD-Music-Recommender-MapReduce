@@ -1,13 +1,17 @@
 package Database.Primitives;
 
 import Database.Similarities;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.io.Writable;
 
 /**
  *
  * @author ninj0x
  */
-public class Song {
+public class Song implements Writable {
 
     private int id;
     private int totalRating;
@@ -89,4 +93,18 @@ public class Song {
     }
     return false;
   }
+
+    @Override
+    /**
+     * We only write out the ID because the value will be the neighborhood,
+     * which is written as an Iterator<Song>
+     */
+    public void write(DataOutput d) throws IOException {
+        d.writeInt(id);
+    }
+
+    @Override
+    public void readFields(DataInput di) throws IOException {
+        id = di.readInt();
+    }
 }

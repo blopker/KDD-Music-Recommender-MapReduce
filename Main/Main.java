@@ -85,9 +85,11 @@ public class Main {
 
         Parser kddParser = new KDDParser(options.getDatabasePath());
         kddParser.parse(songs, users);
+        kddParser.close();
 
         Parser nbrParser = new NeighborhoodParser(options.getNeighborhoodFilePath());  //alternatively print out users that rated that item
         nbrParser.parse(songs, users);
+        nbrParser.close();
 
         Scanner in = new Scanner(System.in);
         int line;
