@@ -16,7 +16,8 @@ import org.kohsuke.args4j.Option;
 public class KNNOptions {
     public static final String USAGE = "Usage:\njava -jar KDD-Music-Recommender.jar -k N -r <ratingCountThreshold> DATABASE\n"
             + "KDD-Music-Recommender.jar -q -t D -n NEIGHBOR_FILE DATABASE\n"
-            + "KDD-Music-Recommender.jar -pre <inFile> <outFilePrefix> <numberOfChunks> <numberOfSongs>\n";
+            + "KDD-Music-Recommender.jar -pre <inFile> <outFilePrefix> <numberOfChunks> <numberOfSongs>\n"
+            + "KDD-Music-Recommender.jar -p [-k N] <dirContainingChunks> <output>\n";
     
     public enum Mode{
         CALC, QUERY, PRE, PARALLEL;
@@ -52,7 +53,6 @@ public class KNNOptions {
         Mode mode = Mode.CALC;
         mode = (query)?Mode.QUERY:mode;
         mode = (preprocess)?Mode.PRE:mode;
-        mode = (parallel)?Mode.PARALLEL:mode;
         return mode;
     }
     
@@ -66,6 +66,10 @@ public class KNNOptions {
 
     public int getK() {
         return k;
+    }
+    
+    public boolean isParallel(){
+        return parallel;
     }
 
     public String getNeighborhoodFilePath() {

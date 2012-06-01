@@ -8,13 +8,9 @@ package Database;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Main.Main;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import org.apache.hadoop.io.Writable;
 
 /**
  *

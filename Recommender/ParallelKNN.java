@@ -4,29 +4,28 @@
  */
 package Recommender;
 
-import Database.*;
+import Database.KDDParser;
 import Database.Parallel.Chunk;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Database.Primitives.User;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import Database.Songs;
+import Database.Users;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
-
-import org.apache.hadoop.fs.*; //Path
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.conf.*;
-import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapred.*; //JobConf
-import org.apache.hadoop.util.*;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.util.StringUtils;
 
 /**
  *
@@ -36,7 +35,20 @@ public class ParallelKNN extends Configured implements Recommender {
 
     @Override
     public void createNeighborhoods() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        FileStatus[] chunks;
+        try {
+            Configuration conf = new Configuration();
+            FileSystem fs = FileSystem.get(conf);
+            Path chunkDir = new Path(Main.Main.getOptions().getArgumentList().get(0));
+            chunks = fs.listStatus(chunkDir);
+            
+            for (FileStatus chunk : chunks) {
+//                System.out.println(chunk.getPath().toString());
+                run(chunk.getPath(), chunks);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -72,7 +84,7 @@ public class ParallelKNN extends Configured implements Recommender {
         @Override
         /**
          * key, otherChunk (value)
-         * 
+         *
          */
         public void map(LongWritable key, Chunk otherChunk, OutputCollector<Song, Iterator<Similarity>> output, Reporter reporter) throws IOException {
             //compare mainChunk with otherChunk
@@ -89,24 +101,26 @@ public class ParallelKNN extends Configured implements Recommender {
         public void reduce(Song song, Iterator<Similarity> similarities,
                 OutputCollector<Song, Iterator<Similarity>> output,
                 Reporter reporter) throws IOException {
-            
+
             if (song.getNeighborhood() != null) {
                 System.out.println("In reduce.  Expected song neighborhood to be empty, but it is not:");
                 song.print();
                 System.exit(1);
             }
-            
+
             while (similarities.hasNext()) {
                 song.addToNeighborhood(similarities.next());
             }
-            
-            output.collect(song, song.getNeighborhood().iterator());                
+
+            output.collect(song, song.getNeighborhood().iterator());
         }
     }
 
-    public int run(String[] args) throws Exception {
+    private int run(Path myChunk, FileStatus[] chunks) {
         JobConf conf = new JobConf(getConf(), ParallelKNN.class);
         conf.setJobName("KNNParallelRecommender");
+        //need to add MainChunk to DistributedCache
+        DistributedCache.addCacheFile(myChunk.toUri(), conf);
 
         conf.setOutputKeyClass(Text.class);
         conf.setOutputValueClass(IntWritable.class);
@@ -117,26 +131,19 @@ public class ParallelKNN extends Configured implements Recommender {
 
         //conf.setInputFormat(TextInputFormat.class);
         //conf.setOutputFormat(TextOutputFormat.class);
-
-
-        //This should be modified
-        //Parse commandline input
-        //need to add MainChunk to DistributedCache
-        //Wherever the other files need to go to get split...
-        List<String> other_args = new ArrayList<String>();
-        for (int i = 0; i < args.length; ++i) {
-            if ("-skip".equals(args[i])) {
-                DistributedCache.addCacheFile(new Path(args[++i]).toUri(), conf);
-                conf.setBoolean("wordcount.skip.patterns", true);
-            } else {
-                other_args.add(args[i]);
-            }
+        
+        for(FileStatus chunk: chunks){
+            FileInputFormat.addInputPath(conf, chunk.getPath());
+        }   
+        
+        String outputDir = Main.Main.getOptions().getArgumentList().get(1);
+        FileOutputFormat.setOutputPath(conf, new Path(outputDir));
+        
+        try {
+            JobClient.runJob(conf);
+        } catch (IOException ex) {
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        FileInputFormat.setInputPaths(conf, new Path(other_args.get(0)));
-        FileOutputFormat.setOutputPath(conf, new Path(other_args.get(1)));
-
-        JobClient.runJob(conf);
         return 0;
     }
 }
