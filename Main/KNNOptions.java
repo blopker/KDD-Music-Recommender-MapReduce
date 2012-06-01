@@ -15,7 +15,7 @@ import org.kohsuke.args4j.Option;
  */
 public class KNNOptions {
     public static final String USAGE = "Usage:\njava -jar KDD-Music-Recommender.jar -k N -r <ratingCountThreshold> DATABASE\n"
-            + "KDD-Music-Recommender.jar -q -t D -n NEIGHBOR_FILE DATABASE\n"
+            + "KDD-Music-Recommender.jar -q -t D -n NEIGHBOR_FILE DATABASE -u ACTIVE_USER_FILE\n"
             + "KDD-Music-Recommender.jar -pre <inFile> <outFilePrefix> <numberOfChunks> <numberOfSongs>\n"
             + "KDD-Music-Recommender.jar -p [-k N] <dirContainingChunks> <output>\n";
     
@@ -43,6 +43,9 @@ public class KNNOptions {
     
     @Option(name="-r", usage="Rating count threshold, used for calc mode only")
     private int ratingCountThreshold = 1;
+    
+    @Option(name="-u", usage="Active user filename (one id on each line), used for query only")
+    private String activeUserFile;
     
     // receives other command line parameters than options
     @Argument
@@ -82,6 +85,10 @@ public class KNNOptions {
     
     public int getRatingCountThreshold() {
         return ratingCountThreshold;
+    }
+    
+    public String getActiveUserFile() {
+        return activeUserFile;
     }
     
 }

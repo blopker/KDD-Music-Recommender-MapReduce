@@ -6,6 +6,7 @@ package Recommender;
 
 import Database.Primitives.User;
 import Database.Songs;
+import java.io.FileNotFoundException;
 
 
 /**
@@ -14,5 +15,5 @@ import Database.Songs;
  */
 public interface Recommender {
     public void createNeighborhoods();
-    public void recommendSong(User active, Songs songs, double threshold);
+    public void recommendSong(String activeUserFile, double threshold) throws FileNotFoundException;
 }

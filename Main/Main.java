@@ -6,8 +6,11 @@ import Preprocessing.Preprocessing;
 import Recommender.ParallelKNN;
 import Recommender.Recommender;
 import Recommender.SequentialKNN;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -72,7 +75,7 @@ public class Main {
 
     // Dynamically switch recommenders based on mode.
     private static Recommender getRecommender() {
-        return options.isParallel()?new ParallelKNN():new SequentialKNN();
+        return options.isParallel() ? new ParallelKNN() : new SequentialKNN();
     }
 
     private static void calculate(Recommender recommender) {
@@ -80,31 +83,13 @@ public class Main {
     }
 
     private static void query(Recommender recommender) {
-        Songs songs = new Songs();
-        Users users = new Users();
-
-        Parser kddParser = new KDDParser(options.getDatabasePath());
-        kddParser.parse(songs, users);
-        kddParser.close();
-
-        Parser nbrParser = new NeighborhoodParser(options.getNeighborhoodFilePath());  //alternatively print out users that rated that item
-        nbrParser.parse(songs, users);
-        nbrParser.close();
-
-        Scanner in = new Scanner(System.in);
-        int line;
-        System.out.println("Enter user id");
-
-        while (in.hasNext()) {
-            line = Integer.parseInt(in.nextLine());
-            User u = users.getUser(line);
-            if (u == null) {
-                System.out.println("Invalid user id");
-                continue;
-            }
-            recommender.recommendSong(u, songs,options.getThreshold());
-            System.out.println("Enter user id");
+        try {
+            recommender.recommendSong(options.getActiveUserFile(), options.getThreshold());
+        } catch (FileNotFoundException ex) {
+            System.err.println("Could not find active user file " + options.getActiveUserFile());
+            ex.printStackTrace();
         }
+
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
