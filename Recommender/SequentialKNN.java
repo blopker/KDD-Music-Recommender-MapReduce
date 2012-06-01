@@ -19,7 +19,6 @@ import Main.Main;
  * @author sarahejones, sns
  */
 public class SequentialKNN implements Recommender{
-    private final int RATING_COUNT_THRESHOLD = 1;
      /* could precompute  this w/ map reduce: finding k nearest neighbors */
     @Override
     public void createNeighborhoods() {
@@ -66,7 +65,7 @@ public class SequentialKNN implements Recommender{
                  * If negative, should not recommend...
                  */
                 double sim = numerator / Math.sqrt(denominator_left * denominator_right);
-                if (userCount > RATING_COUNT_THRESHOLD) {
+                if (userCount > Main.getOptions().getRatingCountThreshold()) {
                     Similarity is = new Similarity( j, sim);
                     i.getNeighborhood().insert(is);
                 }
