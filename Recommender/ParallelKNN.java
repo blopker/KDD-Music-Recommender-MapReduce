@@ -191,7 +191,6 @@ public class ParallelKNN extends Configured implements Recommender {
 
     private int runCalc(Path myChunk, FileStatus[] chunks) {
         JobConf conf = new JobConf(new Configuration(), ParallelKNN.class);
-        System.out.println("Successfully made JobConf conf");
         conf.setJobName("KNNParallelRecommender");
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(myChunk.toUri(), conf);
