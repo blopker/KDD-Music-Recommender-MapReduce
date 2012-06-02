@@ -6,12 +6,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
 
 /**
  *
  * @author ninj0x
  */
-public class Song implements Writable {
+public class Song implements Writable, WritableComparable<Song> {
 
     private int id;
     private int totalRating;
@@ -106,5 +108,10 @@ public class Song implements Writable {
     @Override
     public void readFields(DataInput di) throws IOException {
         id = di.readInt();
+    }
+
+
+    public int compareTo(Song o) {
+        return id - o.getID();
     }
     }
