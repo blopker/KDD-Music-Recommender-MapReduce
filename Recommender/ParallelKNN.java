@@ -187,7 +187,7 @@ public class ParallelKNN extends Configured implements Recommender {
     }
 
     private int runCalc(Path myChunk, FileStatus[] chunks) {
-        JobConf conf = new JobConf(getConf(), ParallelKNN.class);
+        JobConf conf = new JobConf(new Configuration(), ParallelKNN.class);
         conf.setJobName("KNNParallelRecommender");
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(myChunk.toUri(), conf);
@@ -262,6 +262,7 @@ public class ParallelKNN extends Configured implements Recommender {
             }
 
         }
+        
 
         private void parseActiveUsers(String activeUserFilename) {
             Scanner in = new Scanner(activeUserFilename);
@@ -282,12 +283,12 @@ public class ParallelKNN extends Configured implements Recommender {
             Scanner in = new Scanner(value.toString());
             Song song = new Song(in.nextInt());
             while (in.hasNextInt()) {//hasNextLine?
+                in.next();//newline
                 song.addToNeighborhood(new Similarity(songs.getSong(in.nextInt()),in.nextDouble()));
             }            
             in.close();
             
             for (User active : activeUsers) {
-                System.out.println("\nRecommendations for user:" + active.getID());
 //            forall Songs
 //              forall neighborhood_i Union items_rated_by_user(active) item
                 double numerator = 0, denominator = 0, predictedRating;
@@ -325,7 +326,7 @@ public class ParallelKNN extends Configured implements Recommender {
     }
 
     private int runPrediction(Path activeUserFilename, Path neighborhoodFile, double threshold, Path chunks) {
-        JobConf conf = new JobConf(getConf(), ParallelKNN.class);
+        JobConf conf = new JobConf(new Configuration(), ParallelKNN.class);
         conf.setJobName("RecommendationQuery");
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(activeUserFilename.toUri(), conf);
@@ -344,6 +345,7 @@ public class ParallelKNN extends Configured implements Recommender {
 
         String outputDir = Main.getOptions().getArgumentList().get(1);
 
+        NeighborhoodInputFormat.addInputPath(conf, neighborhoodFile);
         FileOutputFormat.setOutputPath(conf,
                 new Path(outputDir));
 
