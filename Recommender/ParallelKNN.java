@@ -11,7 +11,6 @@ import Database.Primitives.PredictedRating;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Database.Primitives.User;
-import Database.Similarities;
 import Database.Songs;
 import Database.Users;
 import Main.Main;
@@ -81,8 +80,8 @@ public class ParallelKNN extends Configured implements Recommender {
      */
     public static class CalcMap extends MapReduceBase implements Mapper<Text, Text, Song, Iterator<Similarity>> {
 
-        private Songs mainSongs;    //my chunk Songs
-        private Users mainUsers;    //my chunk Users  
+        private Songs mainSongs = new Songs();    //my chunk Songs
+        private Users mainUsers = new Users();    //my chunk Users
 
         @Override
         public void configure(JobConf job) {
@@ -188,6 +187,7 @@ public class ParallelKNN extends Configured implements Recommender {
 
     private int runCalc(Path myChunk, FileStatus[] chunks) {
         JobConf conf = new JobConf(new Configuration(), ParallelKNN.class);
+        System.out.println("Successfully made JobConf conf");
         conf.setJobName("KNNParallelRecommender");
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(myChunk.toUri(), conf);
@@ -207,12 +207,14 @@ public class ParallelKNN extends Configured implements Recommender {
         }
 
         String outputDir = Main.getOptions().getArgumentList().get(1);
-        FileOutputFormat.setOutputPath(conf, new Path(outputDir));
+        NeighborhoodOutputFormat.setOutputPath(conf, new Path(outputDir));
 
         try {
             JobClient.runJob(conf);
         } catch (IOException ex) {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Tried JobClient.runJob(conf)");
+            ex.printStackTrace();
         }
         return 0;
     }
