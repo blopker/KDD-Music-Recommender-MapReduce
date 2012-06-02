@@ -32,9 +32,9 @@ public class Song implements Writable, WritableComparable<Song> {
         ratingCount = 0;
     }
 
-    public Song() {
+   /* public Song() {
         
-    }
+    }*/
 
     public void addRating(int rating) {
         totalRating += rating;

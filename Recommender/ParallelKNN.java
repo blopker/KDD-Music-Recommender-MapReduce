@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -81,7 +82,9 @@ public class ParallelKNN extends Configured implements Recommender {
      * chunks based on Song Output: Neighborhoods for all songs Compare chunks
      * to each other and reduce to get the top K neighbors
      */
-    public static class CalcMap extends MapReduceBase implements Mapper<Object, Text, Song, Iterator<Similarity>> {
+    //public static class CalcMap extends MapReduceBase implements Mapper<Object, Text, Song, Iterator<Similarity>> {
+
+    public static class CalcMap extends MapReduceBase implements Mapper<Object, Text, IntWritable, IntWritable> {
 
         private Songs mainSongs = new Songs();    //my chunk Songs
         private Users mainUsers = new Users();    //my chunk Users
@@ -113,7 +116,9 @@ public class ParallelKNN extends Configured implements Recommender {
         }
 
         @Override
-        public void map(Object key, Text otherChunkFilename, OutputCollector<Song, Iterator<Similarity>> output, Reporter reporter) throws IOException {
+        //public void map(Object key, Text otherChunkFilename, OutputCollector<Song, Iterator<Similarity>> output, Reporter reporter) throws IOException {
+
+        public void map(Object key, Text otherChunkFilename, OutputCollector<IntWritable, IntWritable> output, Reporter reporter) throws IOException {
             //compare mainChunk with otherChunk
             System.out.println("in the map function! "+ otherChunkFilename.toString());
             Songs otherSongs = new Songs();
@@ -162,17 +167,20 @@ public class ParallelKNN extends Configured implements Recommender {
 
                     //attempt to add to neighborhood (it will only be added if it should be)
                 }
-                output.collect(i, i.getNeighborhood().iterator());
+                //output.collect(i, i.getNeighborhood().iterator());
+
+                output.collect(new IntWritable(i.getID()), new IntWritable(i.getID()));
             }
         }
     }
 
+//    public static class CalcReduce extends MapReduceBase
+//            implements Reducer<Song, Similarity, Song, Iterator<Similarity>> {
     public static class CalcReduce extends MapReduceBase
-            implements Reducer<Song, Similarity, Song, Iterator<Similarity>> {
-
+            implements Reducer<Song, Similarity, IntWritable, IntWritable> {
         @Override
         public void reduce(Song song, Iterator<Similarity> similarities,
-                OutputCollector<Song, Iterator<Similarity>> output,
+                OutputCollector<IntWritable, IntWritable> output,
                 Reporter reporter) throws IOException {
 
             if (song.getNeighborhood() != null) {
@@ -185,7 +193,7 @@ public class ParallelKNN extends Configured implements Recommender {
                 song.addToNeighborhood(similarities.next());
             }
 
-            output.collect(song, song.getNeighborhood().iterator());
+            output.collect(new IntWritable(song.getID()), new IntWritable(song.getID()));
         }
     }
 
@@ -195,12 +203,18 @@ public class ParallelKNN extends Configured implements Recommender {
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(myChunk.toUri(), conf);
 
-        conf.setOutputKeyClass(Song.class);
-        conf.setOutputValueClass(Iterator.class);
+        //temporary for debugging
+        conf.setOutputKeyClass(IntWritable.class);
+        conf.setOutputValueClass(IntWritable.class);
+        //
+
+        //conf.setOutputKeyClass(Song.class);
+        //conf.setOutputValueClass(Iterator.class);
 
         conf.setMapperClass(CalcMap.class);
         conf.setCombinerClass(CalcReduce.class);
         conf.setReducerClass(CalcReduce.class);
+
 
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(NeighborhoodOutputFormat.class);
@@ -377,6 +391,9 @@ public class ParallelKNN extends Configured implements Recommender {
 
         conf.setOutputKeyClass(Text.class);
         conf.setOutputValueClass(IntWritable.class);
+
+        //        setMapOutputKeyClass() and setMapOutputValueClass()
+
 
         conf.setMapperClass(PredictionMap.class);
         conf.setCombinerClass(PredictionReduce.class);
