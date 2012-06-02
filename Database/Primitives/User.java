@@ -1,14 +1,18 @@
 package Database.Primitives;
 
 import Database.Songs;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import org.apache.hadoop.io.Writable;
 
 /**
  *
  * @author ninj0x
  */
-public class User {
+public class User implements Writable {
     private Songs ratings;
-    private final int id;
+    private int id;  //final
     private int sumRatings = 0;
     
     public User(int id){
@@ -48,6 +52,16 @@ public class User {
     
     public boolean rated(int id){
         return ratings.containsSong(id);
+    }
+
+    @Override
+    public void write(DataOutput d) throws IOException {
+        d.writeInt(id);
+    }
+
+    @Override
+    public void readFields(DataInput di) throws IOException {
+        id = di.readInt();
     }
     
 }
