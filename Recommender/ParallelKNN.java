@@ -237,7 +237,6 @@ public class ParallelKNN extends Configured implements Recommender {
         } catch (IOException ex) {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.exit(0);
         return chuckNameList;
     }
 

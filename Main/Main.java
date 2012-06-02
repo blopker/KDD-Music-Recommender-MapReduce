@@ -1,16 +1,11 @@
 package Main;
 
-import Database.Primitives.User;
-import Database.*;
 import Preprocessing.Preprocessing;
 import Recommender.ParallelKNN;
 import Recommender.Recommender;
 import Recommender.SequentialKNN;
 import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -50,7 +45,7 @@ public class Main {
     }
 
     private static void usage(CmdLineParser parser) {
-        System.out.println(options.USAGE);
+        System.out.println(KNNOptions.USAGE);
         parser.printUsage(System.out);
         System.exit(1);
     }
@@ -89,8 +84,6 @@ public class Main {
             System.err.println("Could not find active user file " + options.getActiveUserFile());
             ex.printStackTrace();
         }
-
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private static void preprocess() {
