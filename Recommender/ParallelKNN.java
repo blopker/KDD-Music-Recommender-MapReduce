@@ -209,17 +209,9 @@ public class ParallelKNN extends Configured implements Recommender {
         Path nameFile = createChunkNameFile(conf, chunks);
         FileInputFormat.addInputPath(conf, nameFile);
         
-        String outputDir = Main.getOptions().getArgumentList().get(1);
-        Path out = new Path(outputDir);
-        try {
-            FileSystem fs = FileSystem.get(conf);
-            if(fs.exists(out)){
-                fs.delete(out, true);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        NeighborhoodOutputFormat.setOutputPath(conf, new Path(outputDir));
+        Path out = getOutoutFolder(myChunk);
+        removeOldOutputDir(conf, out);
+        NeighborhoodOutputFormat.setOutputPath(conf, out);
 
         try {
             JobClient.runJob(conf);
@@ -250,6 +242,24 @@ public class ParallelKNN extends Configured implements Recommender {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
         return chuckNameList;
+    }
+    
+    private Path getOutoutFolder(Path chunk){
+        String outputDir = Main.getOptions().getArgumentList().get(1);
+        outputDir += "/";
+        outputDir += chunk.getName();
+        return new Path(outputDir);
+    }
+    
+    private void removeOldOutputDir(JobConf conf, Path out){
+        try {
+            FileSystem fs = FileSystem.get(conf);
+            if(fs.exists(out)){
+                fs.delete(out, true);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
