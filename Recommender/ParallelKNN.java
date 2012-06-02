@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -201,10 +202,9 @@ public class ParallelKNN extends Configured implements Recommender {
 
         conf.setInputFormat(TextInputFormat.class);
         conf.setOutputFormat(NeighborhoodOutputFormat.class);
-
-        for (FileStatus chunk : chunks) {
-            FileInputFormat.addInputPath(conf, chunk.getPath());
-        }
+        
+        Path nameFile = createChunkNameFile(conf, chunks);
+        FileInputFormat.addInputPath(conf, nameFile);
 
         String outputDir = Main.getOptions().getArgumentList().get(1);
         FileOutputFormat.setOutputPath(conf, new Path(outputDir));
@@ -215,6 +215,28 @@ public class ParallelKNN extends Configured implements Recommender {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
         return 0;
+    }
+    
+    private Path createChunkNameFile(JobConf conf, FileStatus[] chunks) {
+        FileSystem fs;
+        Path chuckNameList = new Path("chunkNameList.txt");
+        try {
+            fs = FileSystem.get(conf);
+            if(fs.exists(chuckNameList)){
+                fs.delete(chuckNameList, true);
+            }
+            
+            FSDataOutputStream out = fs.create(chuckNameList); 
+            
+            for(FileStatus chunk: chunks){
+                out.writeBytes(chunk.getPath().toString()+"\n");
+            }
+            
+        } catch (IOException ex) {
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.exit(0);
+        return chuckNameList;
     }
 
     /**
