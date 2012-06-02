@@ -39,7 +39,7 @@ public class KNNOptions {
     private String  neighborhood_file;
     
     @Option(name="-t", usage="Predicted rating threshold (100 to -100), used for query only")
-    private double  threshold;
+    private double threshold;
     
     @Option(name="-r", usage="Rating count threshold, used for calc mode only")
     private int ratingCountThreshold = 1;

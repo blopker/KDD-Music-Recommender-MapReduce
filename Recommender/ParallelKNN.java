@@ -28,7 +28,9 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.StringUtils;
 
@@ -79,7 +81,7 @@ public class ParallelKNN extends Configured implements Recommender {
      * chunks based on Song Output: Neighborhoods for all songs Compare chunks
      * to each other and reduce to get the top K neighbors
      */
-    public static class CalcMap extends MapReduceBase implements Mapper<Text, Text, Song, Iterator<Similarity>> {
+    public static class CalcMap extends MapReduceBase implements Mapper<Object, Text, Song, Iterator<Similarity>> {
 
         private Songs mainSongs = new Songs();    //my chunk Songs
         private Users mainUsers = new Users();    //my chunk Users
@@ -111,8 +113,9 @@ public class ParallelKNN extends Configured implements Recommender {
         }
 
         @Override
-        public void map(Text key, Text otherChunkFilename, OutputCollector<Song, Iterator<Similarity>> output, Reporter reporter) throws IOException {
+        public void map(Object key, Text otherChunkFilename, OutputCollector<Song, Iterator<Similarity>> output, Reporter reporter) throws IOException {
             //compare mainChunk with otherChunk
+            System.out.println("in the map function! "+ otherChunkFilename.toString());
             Songs otherSongs = new Songs();
             parseOtherChunk(otherChunkFilename.toString(), otherSongs);
 
@@ -193,8 +196,8 @@ public class ParallelKNN extends Configured implements Recommender {
         //need to add MainChunk to DistributedCache
         DistributedCache.addCacheFile(myChunk.toUri(), conf);
 
-        conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(IntWritable.class);
+        conf.setOutputKeyClass(Song.class);
+        conf.setOutputValueClass(Iterator.class);
 
         conf.setMapperClass(CalcMap.class);
         conf.setCombinerClass(CalcReduce.class);
@@ -205,8 +208,17 @@ public class ParallelKNN extends Configured implements Recommender {
         
         Path nameFile = createChunkNameFile(conf, chunks);
         FileInputFormat.addInputPath(conf, nameFile);
-
+        
         String outputDir = Main.getOptions().getArgumentList().get(1);
+        Path out = new Path(outputDir);
+        try {
+            FileSystem fs = FileSystem.get(conf);
+            if(fs.exists(out)){
+                fs.delete(out, true);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+        }
         NeighborhoodOutputFormat.setOutputPath(conf, new Path(outputDir));
 
         try {
@@ -237,7 +249,6 @@ public class ParallelKNN extends Configured implements Recommender {
         } catch (IOException ex) {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.exit(0);
         return chuckNameList;
     }
 
