@@ -55,7 +55,6 @@ public class Main {
         // What mode are we in?
         switch (options.getMode()) {
             case CALC:
-                System.out.println("hi");
                 calculate(recommender);
                 break;
             case QUERY:

@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -49,11 +48,11 @@ public class ParallelKNN extends Configured implements Recommender {
             FileSystem fs = FileSystem.get(conf);
             Path chunkDir = new Path(Main.getOptions().getArgumentList().get(0));
             chunks = fs.listStatus(chunkDir);
-
-            for (FileStatus chunk : chunks) {
-//                System.out.println(chunk.getPath().toString());
-                runCalc(chunk.getPath(), chunks);
-            }
+            runCalc(chunks[0].getPath(), chunks);
+//            for (FileStatus chunk : chunks) {
+////                System.out.println(chunk.getPath().toString());
+//                runCalc(chunk.getPath(), chunks);
+//            }
         } catch (IOException ex) {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -120,6 +119,7 @@ public class ParallelKNN extends Configured implements Recommender {
 
         public void map(Object key, Text otherChunkFilename, OutputCollector<IntWritable, IntWritable> output, Reporter reporter) throws IOException {
             //compare mainChunk with otherChunk
+            Logger.getLogger(ParallelKNN.class.getName()).log(Level.INFO, null, "Map starting with chunk: " + otherChunkFilename.toString());
             System.out.println("in the map function! "+ otherChunkFilename.toString());
             Songs otherSongs = new Songs();
             parseOtherChunk(otherChunkFilename.toString(), otherSongs);
@@ -222,7 +222,7 @@ public class ParallelKNN extends Configured implements Recommender {
         Path nameFile = createChunkNameFile(conf, chunks);
         FileInputFormat.addInputPath(conf, nameFile);
         
-        Path out = getOutoutFolder(myChunk);
+        Path out = getOutputPath(myChunk);
         removeOldOutputDir(conf, out);
         NeighborhoodOutputFormat.setOutputPath(conf, out);
 
@@ -257,10 +257,11 @@ public class ParallelKNN extends Configured implements Recommender {
         return chuckNameList;
     }
     
-    private Path getOutoutFolder(Path chunk){
+    private Path getOutputPath(Path chunk){
         String outputDir = Main.getOptions().getArgumentList().get(1);
+        int indexOfExtension = chunk.getName().lastIndexOf(".");
         outputDir += "/";
-        outputDir += chunk.getName();
+        outputDir += chunk.getName().substring(0, indexOfExtension);
         return new Path(outputDir);
     }
     
