@@ -2,6 +2,7 @@ package Database;
 
 import Database.Primitives.Song;
 import Database.Primitives.User;
+import org.apache.hadoop.conf.Configuration;
 
 
 public class KDDParser extends Parser {
@@ -10,6 +11,10 @@ public class KDDParser extends Parser {
 
     public KDDParser(String f) {
         super(f);
+    }
+    
+    public KDDParser(String f, Configuration conf) {
+        super(f, conf);
     }
 
     @Override

@@ -33,7 +33,6 @@ public class SequentialKNN implements Recommender {
         Songs songs = new Songs();
         Users users = new Users();
         parser.parse(songs, users);
-        parser.close();
 
         //forall items i  //ith iteration
         for (Song i : songs) {
@@ -90,11 +89,9 @@ public class SequentialKNN implements Recommender {
 
         Parser kddParser = new KDDParser(Main.getOptions().getDatabasePath());
         kddParser.parse(songs, users);
-        kddParser.close();
 
         Parser nbrParser = new NeighborhoodParser(Main.getOptions().getNeighborhoodFilePath());  //alternatively print out users that rated that item
         nbrParser.parse(songs, users);
-        nbrParser.close();
         
         FileInputStream file = new FileInputStream(activeUserFile);
         Scanner in = new Scanner(file);

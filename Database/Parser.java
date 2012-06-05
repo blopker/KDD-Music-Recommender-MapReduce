@@ -1,26 +1,49 @@
 package Database;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 
 public abstract class Parser {
 
     Songs songs;
     Users users;
     private BufferedReader file;
-    private FileReader reader;
+    Scanner scanner;
+//    private FileReader reader;
     
-
+    /**
+     * Constructor for local files.
+     * @param database_file 
+     */
     public Parser(String database_file) {
         try {
-            reader = new FileReader(database_file);
-            file = new BufferedReader(reader);
+            file = new BufferedReader(new FileReader(database_file));
+            scanner = new Scanner(file);
         } catch (FileNotFoundException e) {
             System.err.println("Unable to open database: " + database_file);
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Constructor for HDFS files.
+     * @param database_file
+     * @param conf 
+     */
+    public Parser(String database_file, Configuration conf) {
+        try {
+            FileSystem fs = FileSystem.get(URI.create(database_file), conf);
+            InputStream in = fs.open(new Path(database_file));
+            scanner = new Scanner(in);
+        } catch (IOException ex) {
+            Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -28,21 +51,20 @@ public abstract class Parser {
         songs = s;
         users = u;
         System.err.println("Reading database...");
-        StringBuilder text = new StringBuilder();
-        Scanner scanner = new Scanner(file);
+//        Scanner scanner = new Scanner(file);
         while (scanner.hasNextLine()) {
             format(scanner.nextLine());
         }
-        scanner.close();
         System.err.println("Database loaded.");
+        close();
     }
     
     public void close() {
         try {
             file.close();
-            reader.close();
+            scanner.close();
         } catch (IOException ex) {
-            System.err.println("Unable to close " + file.toString() + " or " + reader.toString());
+            System.err.println("Unable to close " + file.toString());
             ex.printStackTrace();
         }
     }
