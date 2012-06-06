@@ -50,7 +50,11 @@ public class KDDParser extends Parser {
         String[] splitData = dataLine.split("\\|");
         if (splitData != null) {
             currentUser = new User(strArrayToIntArray(splitData)[0]);
+            if(splitData.length == 3){
+                currentUser.setAvgRating(Double.valueOf(splitData[2]));
+            }
             users.addUser(currentUser);
+
         } else {
             System.err.println("Unexpected format for user line: " + dataLine);
         }

@@ -56,7 +56,8 @@ public abstract class Parser {
             format(scanner.nextLine());
         }
         System.err.println("Database loaded.");
-        close();
+        scanner.close();
+//        close();
     }
     
     public void close() {

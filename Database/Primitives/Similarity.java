@@ -24,6 +24,12 @@ public class Similarity implements Comparable<Similarity>, Writable {
         similarity = s;
     }
 
+    public Similarity(String idAndValue) {
+        String[] split = idAndValue.split(" ");
+        this.neighbor = new Song(Integer.valueOf(split[0]));
+        similarity = Double.valueOf(split[1]);
+    }
+    
     public double getSimilarity() {
         return similarity;
     }
@@ -32,6 +38,7 @@ public class Similarity implements Comparable<Similarity>, Writable {
         return neighbor;
     }
 
+    @Override
     public int compareTo(Similarity s) {
         double sim_other = s.getSimilarity();
        if (similarity > sim_other)
@@ -52,5 +59,9 @@ public class Similarity implements Comparable<Similarity>, Writable {
         similarity = di.readDouble();
     }
 
+    @Override
+    public String toString(){
+        return neighbor.getID() + " " + similarity;
+    }
 
 }

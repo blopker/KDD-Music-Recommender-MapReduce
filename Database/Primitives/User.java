@@ -14,6 +14,8 @@ public class User implements Writable {
     private Songs ratings;
     private int id;  //final
     private int sumRatings = 0;
+    private double avgRatingChunk = -1;
+    private double chunkRating = 0;
     
     public User(int id){
         this.id = id;
@@ -43,7 +45,15 @@ public class User implements Writable {
     }
     
     public double getAvgRating(){
-        return ((double)sumRatings)/ratings.getCount();
+        if(avgRatingChunk == -1){
+            return ((double)sumRatings)/ratings.getCount();
+        } else {
+            return avgRatingChunk;
+        }        
+    }
+    
+    public void setAvgRating(double rating){
+        avgRatingChunk = rating;
     }
     
     public boolean rated(Song song){

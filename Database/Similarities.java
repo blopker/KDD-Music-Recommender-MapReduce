@@ -16,7 +16,7 @@ import java.util.Iterator;
  *
  * @author sarahejones, sns
  */
-public class Similarities  {
+public class Similarities implements Iterable<Similarity> {
     private int k;
     private ArrayList<Similarity> neighbors;
 
@@ -57,6 +57,7 @@ public class Similarities  {
         return false;
     }
     
+    @Override
     public Iterator<Similarity> iterator() {
         return neighbors.iterator();
     }
