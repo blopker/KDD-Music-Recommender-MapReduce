@@ -4,16 +4,16 @@
  */
 package Recommender;
 
-import Database.KDDParser;
+import Database.*;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Database.Primitives.User;
-import Database.Similarities;
-import Database.Songs;
-import Database.Users;
 import Main.Main;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.hadoop.conf.Configuration;
@@ -62,16 +62,56 @@ public class ParallelKNN extends Configured implements Recommender {
 
     @Override
     public void recommendSong(String activeUserFile, double threshold) throws FileNotFoundException {
-        try {
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(conf);
-            Path chunkDir = new Path(Main.getOptions().getArgumentList().get(0));
+        Songs songs = new Songs();
+        Users users = new Users();
+        ArrayList<User> activeUsers = new ArrayList<User>();
 
-//            runPrediction(new Path(activeUserFile), new Path(Main.getOptions().getNeighborhoodFilePath()), threshold, chunkDir);
-        } catch (IOException ex) {
-            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
+        Parser kddParser = new KDDParser(Main.getOptions().getDatabasePath());
+        kddParser.parse(songs, users);
+
+        Parser nbrParser = new NeighborhoodParser(Main.getOptions().getNeighborhoodFilePath());  //alternatively print out users that rated that item
+        nbrParser.parse(songs, users);
+
+        FileInputStream file = new FileInputStream(activeUserFile);
+        Scanner in = new Scanner(file);
+        int line;
+        User u;
+        while (in.hasNext()) {
+            line = Integer.parseInt(in.nextLine());
+            u = users.getUser(line);
+            if (u == null) {
+                System.out.println("Invalid user id");
+                continue;
+            }
+            activeUsers.add(u);
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        //recommendation
+        for (User active : activeUsers) {
+//            System.out.println("\nRecommendations for user:" + active.getID());
+//      forall items i
+            for (Song s : songs) {
+//        forall neighborhood_i Union items_rated_by_user(active) item
+                double numerator = 0, denominator = 0, predictedRating;
+                for (Song ratedByActive : active.getRatings()) {
+                    if (s.getNeighborhood().contains(ratedByActive) && !active.rated(s)) {
+                        double similarity = songs.getSong(ratedByActive.getID()).getSimilarity(s);
+                        System.out.println("Sim" + similarity);
+//                numerator += math ... similarity(i, item) * active.rating(item) …
+                        numerator += similarity * active.getRating(ratedByActive);
+//                denominator += |similarity(i, item)|                    
+                        denominator += Math.abs(similarity);
+                    }
+                }
+                predictedRating = numerator / denominator;
+                //add item to set of recommended items if preQdicted_rating is “good enough”\
+                if (!Double.isNaN(predictedRating)) //if (predictedRating >= threshold)  (Not doing threshold for this part)
+                {
+                    System.out.println(s.getID() + "\t" + predictedRating);
+                }
+
+            }
+        }
     }
 
     /**
@@ -86,7 +126,6 @@ public class ParallelKNN extends Configured implements Recommender {
     public static class CalcMap
             extends Mapper<Object, Text, IntWritable, Text> {
 
-        private final static Text songId = new Text("SONG!");
         private Users myUsers = new Users();
         private Songs mySongs = new Songs();
         private int threshold;
@@ -128,10 +167,16 @@ public class ParallelKNN extends Configured implements Recommender {
                     int userCount = 0;
                     for (User user : myUsers) {
                         double num = 0, den_l = 0, den_r = 0;
-                        if (user.rated(i) && user.rated(j)) {
+//                        System.out.println("comparing! song: " + i.getID() + " and " + j.getID());
+                        User other = otherUsers.getUser(user.getID());
+                        if (other == null) {
+                            continue;
+                        }
+                        if (user.rated(i) && other.rated(j)) {
+//                            System.out.println("if (user.rated(i) && user.rated(j))! song: " + i.getID() + " and " + j.getID());
                             userCount++;
                             double iTmp = user.getRating(i) - user.getAvgRating();
-                            double jTmp = user.getRating(j) - user.getAvgRating();
+                            double jTmp = other.getRating(j) - other.getAvgRating();
 
                             num = iTmp * jTmp;
                             den_l = iTmp * iTmp;
@@ -152,8 +197,8 @@ public class ParallelKNN extends Configured implements Recommender {
                     double sim = numerator / Math.sqrt(denominator_left * denominator_right);
                     if (userCount > threshold) {
                         Similarity is = new Similarity(j, sim);
-                        System.out.println(userCount + " " + threshold);
-                        System.out.println("in the map function!song: " + i.getID() + " is: " + is.toString());
+//                        System.out.println(userCount + " " + threshold);
+//                        System.out.println("in the map function!song: " + i.getID() + " is: " + is.toString());
                         context.write(new IntWritable(i.getID()), new Text(is.toString()));
                     }
                 }
@@ -169,7 +214,7 @@ public class ParallelKNN extends Configured implements Recommender {
                 Context context) throws IOException, InterruptedException {
             Similarities neih = new Similarities();
             for (Text s : sim) {
-                System.out.println("sim " + s.toString());
+//                System.out.println("sim " + s.toString());
                 neih.insert(new Similarity(s.toString()));
             }
 
@@ -255,145 +300,4 @@ public class ParallelKNN extends Configured implements Recommender {
             Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-//    /**
-//     * ************************************************************************
-//     * Prediction Query
-//     */
-//    public static class PredictionMap extends MapReduceBase implements Mapper<LongWritable, Text, User, PredictedRating> {
-//
-//        private Songs songs;    //KDD DB Songs
-//        private Users users;    //KDD DB Users  
-//        private ArrayList<User> activeUsers;
-//
-//        @Override
-//        public void configure(JobConf job) {
-//            //get active users from the cache
-//            Path[] localFiles = new Path[0];
-//            try {
-//                localFiles = DistributedCache.getLocalCacheFiles(job);
-//            } catch (IOException ioe) {
-//                System.err.println("Caught exception while getting cached files: " + StringUtils.stringifyException(ioe));
-//            }
-//            parseAllChunks(job.get("chunkDirectory"), job);
-//            parseActiveUsers(localFiles[0].toString());
-//        }
-//
-//        private void parseAllChunks(String chunkDirectory, JobConf job) {
-//
-//            FileSystem fs;
-//            FileStatus[] chunks = null;
-//            Path chunkDir = new Path(chunkDirectory);
-//
-//            try {
-//                fs = FileSystem.get(job);
-//                chunks = fs.listStatus(chunkDir);
-//
-//            } catch (IOException ex) {
-//                System.err.println("Unable to get PredictionMap FileSystem");
-//                System.exit(1);
-//            }
-//
-//            for (FileStatus chunk : chunks) {
-//                KDDParser kddParser = new KDDParser(chunk.getPath().toString());
-//                kddParser.parse(songs, users);
-//                kddParser.close();
-//            }
-//
-//        }
-//
-//        private void parseActiveUsers(String activeUserFilename) {
-//            Scanner in = new Scanner(activeUserFilename);
-//            while (in.hasNextInt()) {
-//                activeUsers.add(users.getUser(in.nextInt()));
-//            }
-//            in.close();
-//        }
-//
-//        @Override
-//        /**
-//         * key, otherChunk (value)
-//         *
-//         */
-//        public void map(LongWritable filePosition, Text value, OutputCollector<User, PredictedRating> output, Reporter reporter) throws IOException {
-//            //recommendation
-//
-//            Scanner in = new Scanner(value.toString());
-//            Song song = new Song(in.nextInt());
-//            while (in.hasNextInt()) {//hasNextLine?
-//                in.next();//newline
-//                song.addToNeighborhood(new Similarity(songs.getSong(in.nextInt()), in.nextDouble()));
-//            }
-//            in.close();
-//
-//            for (User active : activeUsers) {
-////            forall Songs
-////              forall neighborhood_i Union items_rated_by_user(active) item
-//                double numerator = 0, denominator = 0, predictedRating;
-//                for (Song ratedByActive : active.getRatings()) {
-//                    if (song.getNeighborhood().contains(ratedByActive) && !active.rated(song)) {
-//                        double similarity = songs.getSong(ratedByActive.getID()).getSimilarity(song);
-////                numerator += math ... similarity(i, item) * active.rating(item) …
-//                        numerator += similarity * active.getRating(ratedByActive);
-////                denominator += |similarity(i, item)|                    
-//                        denominator += Math.abs(similarity);
-//                    }
-//                }
-//                predictedRating = numerator / denominator;
-//                //add item to set of recommended items if preQdicted_rating is “good enough”\
-//                if (!Double.isNaN(predictedRating)) //if (predictedRating >= threshold)  (Not doing threshold for this part)
-//                {
-//                    output.collect(active, new PredictedRating(song, predictedRating));
-//                }
-//            }
-//        }
-//    }
-//
-//    public static class PredictionReduce extends MapReduceBase
-//            implements Reducer<User, PredictedRating, User, Iterator<PredictedRating>> {
-//
-//        @Override
-//        public void reduce(User user, Iterator<PredictedRating> predictedRating,
-//                OutputCollector<User, Iterator<PredictedRating>> output,
-//                Reporter reporter) throws IOException {
-//
-//            //If we want any additional thresholds, this is where they might go
-//
-//            output.collect(user, predictedRating);
-//        }
-//    }
-//
-//    private int runPrediction(Path activeUserFilename, Path neighborhoodFile, double threshold, Path chunks) {
-//        JobConf conf = new JobConf(new Configuration(), ParallelKNN.class);
-//        conf.setJobName("RecommendationQuery");
-//        //need to add MainChunk to DistributedCache
-//        DistributedCache.addCacheFile(activeUserFilename.toUri(), conf);
-//
-//        conf.setOutputKeyClass(Text.class);
-//        conf.setOutputValueClass(IntWritable.class);
-//
-//        //        setMapOutputKeyClass() and setMapOutputValueClass()
-//
-//
-//        conf.setMapperClass(PredictionMap.class);
-//        conf.setCombinerClass(PredictionReduce.class);
-//        conf.setReducerClass(PredictionReduce.class);
-//
-//        conf.setInputFormat(NeighborhoodInputFormat.class);
-//        conf.setOutputFormat(TextOutputFormat.class);
-//
-//        conf.set("chunkDirectory", chunks.toString());
-//
-//        String outputDir = Main.getOptions().getArgumentList().get(1);
-//
-//        NeighborhoodInputFormat.addInputPath(conf, neighborhoodFile);
-//        FileOutputFormat.setOutputPath(conf,
-//                new Path(outputDir));
-//
-//        try {
-//            JobClient.runJob(conf);
-//        } catch (IOException ex) {
-//            Logger.getLogger(ParallelKNN.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return 0;
-//    }
 }
