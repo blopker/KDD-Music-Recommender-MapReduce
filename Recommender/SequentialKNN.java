@@ -13,6 +13,7 @@ import Main.Main;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Scanner;
 
 /**
@@ -32,8 +33,15 @@ public class SequentialKNN implements Recommender {
 
         Songs songs = new Songs();
         Users users = new Users();
+        Calendar loadStartTime = Calendar.getInstance();
+        System.err.println("Start Time for loading DB: " + loadStartTime.getTimeInMillis());
         parser.parse(songs, users);
+        Calendar loadEndTime = Calendar.getInstance();
+        System.err.println("End Time for loading DB: " + loadEndTime.getTimeInMillis());
 
+        
+        Calendar runStartTime = Calendar.getInstance();
+        System.err.println("Start Time for running KNN algorithm: " + runStartTime.getTimeInMillis());
         //forall items i  //ith iteration
         for (Song i : songs) {
 
@@ -79,6 +87,8 @@ public class SequentialKNN implements Recommender {
             }
             i.print();
         }
+        Calendar runEndTime = Calendar.getInstance();
+        System.err.println("End Time for running KNN algorithm: " + runEndTime.getTimeInMillis());
     }
 
     @Override
