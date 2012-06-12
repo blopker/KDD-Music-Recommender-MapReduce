@@ -9,10 +9,7 @@ This project is a Hadoop/Mapreduce implementation of the K-nearest neighbor simi
 Write ups
 --------
 * [Proposal](https://docs.google.com/document/d/18yulhDmP1zktvbdwsnsth73NDUhM3rBdnQpP5M5wRDc/edit)
-* [Final paper]()
-
-Final Paper
------------
+* [Final paper](https://github.com/ninj0x/KDD-Music-Recommender-MapReduce/blob/master/CS290NKNNMapReduceFinalPaper.pdf?raw=true)
 
 Dependencies
 ------------
