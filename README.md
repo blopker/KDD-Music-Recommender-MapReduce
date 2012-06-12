@@ -6,9 +6,10 @@ Description
 -----------
 This project is a Hadoop/Mapreduce implementation of the K-nearest neighbor similarity algorithm. Our main contribution was parallelizing KNN's training method for use in MapReduce. 
 
-Proposal
+Write ups
 --------
-https://docs.google.com/document/d/18yulhDmP1zktvbdwsnsth73NDUhM3rBdnQpP5M5wRDc/edit
+* [Proposal](https://docs.google.com/document/d/18yulhDmP1zktvbdwsnsth73NDUhM3rBdnQpP5M5wRDc/edit)
+* [Final paper]()
 
 Final Paper
 -----------
@@ -21,7 +22,7 @@ Dependencies
 Contents
 --------
 * smalltest.txt - A small database to test with. Can be run through the entire process.  
-* chunkit.py - Python script we used to chunk up a database file to be consumed by MapReduce.
+* chunkit.py - Python script to chunk up a database file to be consumed by MapReduce.
 
 Usage
 -----
