@@ -13,11 +13,24 @@ public class NeighborhoodParser extends Parser {
 
     @Override
     protected void format(String dataLine) {
-        if (dataLine.contains("-")) {
-            formatSimilarity(dataLine);
-        } else {
-            formatSong(dataLine);
+        String[] data = dataLine.split("[ \t]");
+        if (data.length != 3) {
+		System.err.println("Split dataline into "+data.length+" pieces.");
+	        System.exit(1);
         }
+        Song main = songs.getSong(Integer.parseInt(data[0]));
+        if (main == null) {
+            System.err.println("Could not find song with id:"+Integer.parseInt(data[0]));
+        }
+	Song other = songs.getSong(Integer.parseInt(data[1]));
+        if (other == null) {
+            System.err.println("Could not find other song id:"+Integer.parseInt(data[1]));
+        }
+        double neighborSim = Double.parseDouble(data[2]);
+        Similarity sim = new Similarity(other, neighborSim);
+        main.addToNeighborhood(sim);
+        
+        
     }
 
     private void formatSong(String dataLine) {

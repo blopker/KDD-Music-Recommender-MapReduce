@@ -10,6 +10,8 @@ public class Similarity implements Comparable<Similarity>{
     private double similarity;
 
     public Similarity(Song neighbor, double s) {
+        if (neighbor == null)
+            System.out.println("Setting the neighbor as null");
         this.neighbor = neighbor;
         similarity = s;
     }

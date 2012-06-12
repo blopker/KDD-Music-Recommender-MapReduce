@@ -64,7 +64,7 @@ public class KDDParser extends Parser {
         for (int i = 0; i < 2; i++) {
             //none is a keyword in the KDD database
 
-            int info = (line[i].toLowerCase() == "none") ? -1 : Integer.valueOf(line[i]).intValue();
+            int info = ("none".equals(line[i].toLowerCase())) ? -1 : Integer.valueOf(line[i]).intValue();
             infoLine[i] = info;
 
         }

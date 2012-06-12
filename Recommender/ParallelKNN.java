@@ -79,7 +79,6 @@ public class ParallelKNN extends Configured implements Recommender {
     public static class CalcMap
             extends Mapper<Object, Text, IntWritable, Text> {
 
-        private final static Text songId = new Text("SONG!");
         private Users myUsers = new Users();
         private Songs mySongs = new Songs();
         private int threshold;
@@ -121,10 +120,16 @@ public class ParallelKNN extends Configured implements Recommender {
                     int userCount = 0;
                     for (User user : myUsers) {
                         double num = 0, den_l = 0, den_r = 0;
-                        if (user.rated(i) && user.rated(j)) {
+//                        System.out.println("comparing! song: " + i.getID() + " and " + j.getID());
+                        User other = otherUsers.getUser(user.getID());
+                        if (other == null) {
+                            continue;
+                        }
+                        if (user.rated(i) && other.rated(j)) {
+//                            System.out.println("if (user.rated(i) && user.rated(j))! song: " + i.getID() + " and " + j.getID());
                             userCount++;
                             double iTmp = user.getRating(i) - user.getAvgRating();
-                            double jTmp = user.getRating(j) - user.getAvgRating();
+                            double jTmp = other.getRating(j) - other.getAvgRating();
 
                             num = iTmp * jTmp;
                             den_l = iTmp * iTmp;
@@ -160,7 +165,7 @@ public class ParallelKNN extends Configured implements Recommender {
                 Context context) throws IOException, InterruptedException {
             Similarities neih = new Similarities();
             for (Text s : sim) {
-                System.out.println("sim " + s.toString());
+//                System.out.println("sim " + s.toString());
                 neih.insert(new Similarity(s.toString()));
             }
 

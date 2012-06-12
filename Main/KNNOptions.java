@@ -11,7 +11,7 @@ import org.kohsuke.args4j.Option;
  */
 public class KNNOptions {
     public static final String USAGE = "Usage:\njava -jar KDD-Music-Recommender.jar -k N -r <ratingCountThreshold> DATABASE\n"
-            + "KDD-Music-Recommender.jar -q -t D -n NEIGHBOR_FILE DATABASE -u ACTIVE_USER_FILE\n"
+            + "KDD-Music-Recommender.jar -q -t D -n neighborhood_file -u ACTIVE_USER_FILE DATABASE\n"
             + "KDD-Music-Recommender.jar -pre <inFile> <outFilePrefix> <numberOfChunks> <numberOfSongs>\n"
             + "KDD-Music-Recommender.jar -p [-k N] <dirContainingChunks> <output>\n";
     
