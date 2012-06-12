@@ -51,9 +51,14 @@ public class Similarities implements Iterable<Similarity> {
     }
     
     public boolean contains(Song song) {
-        for (Similarity sim : neighbors)
+        for (Similarity sim : neighbors) {
+            if (song == null)
+                System.err.println("Cannot contain null song");
+            if (sim.getNeighborSong() == null)
+                System.err.println("similarity neighborhood song is null");
             if (song.getID() == sim.getNeighborSong().getID())
                 return true;
+        }
         return false;
     }
     

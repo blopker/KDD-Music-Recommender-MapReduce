@@ -20,6 +20,8 @@ public class Similarity implements Comparable<Similarity>, Writable {
     private double similarity;
 
     public Similarity(Song neighbor, double s) {
+        if (neighbor == null)
+            System.out.println("Setting the neighbor as null");
         this.neighbor = neighbor;
         similarity = s;
     }

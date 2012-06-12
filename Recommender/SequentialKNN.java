@@ -102,7 +102,6 @@ public class SequentialKNN implements Recommender {
 
         Parser nbrParser = new NeighborhoodParser(Main.getOptions().getNeighborhoodFilePath());  //alternatively print out users that rated that item
         nbrParser.parse(songs, users);
-        
         FileInputStream file = new FileInputStream(activeUserFile);
         Scanner in = new Scanner(file);
         int line;
@@ -114,6 +113,7 @@ public class SequentialKNN implements Recommender {
                 System.out.println("Invalid user id");
                 continue;
             }
+           
             activeUsers.add(u);
         }
         
@@ -126,10 +126,10 @@ public class SequentialKNN implements Recommender {
                 double numerator = 0, denominator = 0, predictedRating;
                 for (Song ratedByActive : active.getRatings()) {
                     if (s.getNeighborhood().contains(ratedByActive) && !active.rated(s)) {
-                        double similarity = songs.getSong(ratedByActive.getID()).getSimilarity(s);
-                        System.out.println("Sim" + similarity);
+                        Song rba = songs.getSong(ratedByActive.getID());
+                        double similarity = rba.getSimilarity(s);
 //                numerator += math ... similarity(i, item) * active.rating(item) …
-                        numerator += similarity * active.getRating(ratedByActive);
+                        numerator += similarity * active.getRating(rba);
 //                denominator += |similarity(i, item)|                    
                         denominator += Math.abs(similarity);
                     }
