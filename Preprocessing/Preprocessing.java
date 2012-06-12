@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Preprocessing;
 
 import java.io.FileInputStream;
@@ -91,9 +87,9 @@ public class Preprocessing {
     }
 
     private static int[] strArrayToIntArray(String[] line) {
-        int[] infoLine = new int[line.length];
-        for (int i = 0; i < line.length; i++) {
-            int info = (line[i].toLowerCase() == "none") ? -1 : Integer.valueOf(line[i]).intValue();
+        int[] infoLine = new int[2];
+        for (int i = 0; i < 2; i++) {
+            int info = ("none".equals(line[i].toLowerCase())) ? -1 : Integer.valueOf(line[i]).intValue();
             infoLine[i] = info;
         }
         return infoLine;

@@ -1,14 +1,13 @@
 package Database;
 
 import Database.Primitives.Song;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public class Songs implements Iterable<Song> {
 
@@ -27,19 +26,18 @@ public class Songs implements Iterable<Song> {
         }
         count++;
     }
-    
-    public int getCount(){
+
+    public int getCount() {
         return count;
     }
 
     public Song getSong(int id) {
         return songs.get(id);
     }
-    
-    public boolean containsSong(int id){
+
+    public boolean containsSong(int id) {
         return songs.containsKey(id);
     }
-    
 
     @Override
     public Iterator<Song> iterator() {

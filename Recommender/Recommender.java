@@ -1,17 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Recommender;
 
-import Database.Primitives.User;
-import Database.Songs;
 import java.io.FileNotFoundException;
 
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public interface Recommender {
     public void createNeighborhoods();

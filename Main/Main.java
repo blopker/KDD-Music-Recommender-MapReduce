@@ -8,14 +8,9 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-
-/*
- * To change this template, choose Tools | Templates and open the template in
- * the editor.
- */
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public class Main {
 
@@ -81,7 +76,6 @@ public class Main {
             recommender.recommendSong(options.getActiveUserFile(), options.getThreshold());
         } catch (FileNotFoundException ex) {
             System.err.println("Could not find active user file " + options.getActiveUserFile());
-            ex.printStackTrace();
         }
     }
 

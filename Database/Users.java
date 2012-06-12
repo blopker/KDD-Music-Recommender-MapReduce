@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public class Users implements Iterable<User> {
 
@@ -19,13 +19,13 @@ public class Users implements Iterable<User> {
     }
 
     protected void addUser(User user) {
-            users.put(user.getID(), user);
+        users.put(user.getID(), user);
     }
 
     public User getUser(int id) {
         return users.get(id);
     }
-    
+
     public ArrayList<User> getUserList() {
         return (ArrayList) users.values();
     }

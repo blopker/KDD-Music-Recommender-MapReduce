@@ -8,59 +8,59 @@ import org.apache.hadoop.io.Writable;
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public class User implements Writable {
+
     private Songs ratings;
     private int id;  //final
     private int sumRatings = 0;
     private double avgRatingChunk = -1;
-    private double chunkRating = 0;
-    
-    public User(int id){
+
+    public User(int id) {
         this.id = id;
         ratings = new Songs();
     }
-    
-    public int getID(){
+
+    public int getID() {
         return id;
     }
-    
-    public Songs getRatings(){
+
+    public Songs getRatings() {
         return ratings;
     }
-    
-    public int getRating(Song song){
+
+    public int getRating(Song song) {
         return getRating(song.getID());
-        
+
     }
-    
-    public int getRating(int id){
+
+    public int getRating(int id) {
         return ratings.getSong(id).getRating();
     }
-    
-    public void addRating(Song song){
+
+    public void addRating(Song song) {
         ratings.addSong(song);
         sumRatings += song.getRating();
     }
-    
-    public double getAvgRating(){
-        if(avgRatingChunk == -1){
-            return ((double)sumRatings)/ratings.getCount();
+
+    public double getAvgRating() {
+        if (avgRatingChunk == -1) {
+            return ((double) sumRatings) / ratings.getCount();
         } else {
             return avgRatingChunk;
-        }        
+        }
     }
-    
-    public void setAvgRating(double rating){
+
+    public void setAvgRating(double rating) {
         avgRatingChunk = rating;
     }
-    
-    public boolean rated(Song song){
+
+    public boolean rated(Song song) {
         return rated(song.getID());
     }
-    
-    public boolean rated(int id){
+
+    public boolean rated(int id) {
         return ratings.containsSong(id);
     }
 
@@ -73,5 +73,4 @@ public class User implements Writable {
     public void readFields(DataInput di) throws IOException {
         id = di.readInt();
     }
-    
 }

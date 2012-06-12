@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Recommender;
 
-import Database.*;
 import Database.Primitives.Similarity;
 import Database.Primitives.Song;
 import Database.Primitives.User;
-import Main.KNNOptions;
+import Database.*;
 import Main.Main;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

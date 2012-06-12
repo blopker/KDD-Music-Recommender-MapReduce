@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 
 public abstract class Parser {
 
@@ -17,10 +16,11 @@ public abstract class Parser {
     private BufferedReader file;
     Scanner scanner;
 //    private FileReader reader;
-    
+
     /**
      * Constructor for local files.
-     * @param database_file 
+     *
+     * @param database_file
      */
     public Parser(String database_file) {
         try {
@@ -31,11 +31,12 @@ public abstract class Parser {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Constructor for HDFS files.
+     *
      * @param database_file
-     * @param conf 
+     * @param conf
      */
     public Parser(String database_file, Configuration conf) {
         try {
@@ -51,22 +52,19 @@ public abstract class Parser {
         songs = s;
         users = u;
         System.err.println("Reading database...");
-//        Scanner scanner = new Scanner(file);
         while (scanner.hasNextLine()) {
             format(scanner.nextLine());
         }
         System.err.println("Database loaded.");
         scanner.close();
-//        close();
     }
-    
+
     public void close() {
         try {
             file.close();
             scanner.close();
         } catch (IOException ex) {
             System.err.println("Unable to close " + file.toString());
-            ex.printStackTrace();
         }
     }
 

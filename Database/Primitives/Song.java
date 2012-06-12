@@ -1,17 +1,12 @@
 package Database.Primitives;
 
 import Database.Similarities;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
-public class Song implements Writable, WritableComparable<Song> {
+public class Song{
 
     private int id;
     private int totalRating;
@@ -30,10 +25,6 @@ public class Song implements Writable, WritableComparable<Song> {
         ratingCount = 0;
     }
 
-   /* public Song() {
-        
-    }*/
-
     public void addRating(int rating) {
         totalRating += rating;
         ratingCount++;
@@ -50,6 +41,7 @@ public class Song implements Writable, WritableComparable<Song> {
 
     /**
      * Avgerage Rating is getRating()/getRatingCount()
+     *
      * @return
      */
     public int getRating() {
@@ -91,29 +83,17 @@ public class Song implements Writable, WritableComparable<Song> {
 
     @Override
     public boolean equals(Object o) {
-    if (o instanceof Song) {
-      Song other = (Song) o;
-      return (id == other.id);
-    }
-    return false;
-  }
-
-    @Override
-    /**
-     * We only write out the ID because the value will be the neighborhood,
-     * which is written as an Iterator<Song>
-     */
-    public void write(DataOutput d) throws IOException {
-        d.writeInt(id);
+        if (o instanceof Song) {
+            Song other = (Song) o;
+            return (id == other.id);
+        }
+        return false;
     }
 
     @Override
-    public void readFields(DataInput di) throws IOException {
-        id = di.readInt();
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + this.id;
+        return hash;
     }
-
-
-    public int compareTo(Song o) {
-        return id - o.getID();
-    }
-    }
+}

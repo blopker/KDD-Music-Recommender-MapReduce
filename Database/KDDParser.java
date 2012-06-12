@@ -4,7 +4,6 @@ import Database.Primitives.Song;
 import Database.Primitives.User;
 import org.apache.hadoop.conf.Configuration;
 
-
 public class KDDParser extends Parser {
 
     private User currentUser;
@@ -12,7 +11,7 @@ public class KDDParser extends Parser {
     public KDDParser(String f) {
         super(f);
     }
-    
+
     public KDDParser(String f, Configuration conf) {
         super(f, conf);
     }
@@ -50,7 +49,7 @@ public class KDDParser extends Parser {
         String[] splitData = dataLine.split("\\|");
         if (splitData != null) {
             currentUser = new User(strArrayToIntArray(splitData)[0]);
-            if(splitData.length == 3){
+            if (splitData.length == 3) {
                 currentUser.setAvgRating(Double.valueOf(splitData[2]));
             }
             users.addUser(currentUser);
@@ -64,9 +63,9 @@ public class KDDParser extends Parser {
         int[] infoLine = new int[2];
         for (int i = 0; i < 2; i++) {
             //none is a keyword in the KDD database
-            
-                int info = (line[i].toLowerCase() == "none") ? -1 : Integer.valueOf(line[i]).intValue();
-                infoLine[i] = info;
+
+            int info = (line[i].toLowerCase() == "none") ? -1 : Integer.valueOf(line[i]).intValue();
+            infoLine[i] = info;
 
         }
         return infoLine;

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Main;
 
 import java.util.ArrayList;
@@ -11,7 +7,7 @@ import org.kohsuke.args4j.Option;
 
 /**
  *
- * @author ninj0x
+ * @author Karl Lopker
  */
 public class KNNOptions {
     public static final String USAGE = "Usage:\njava -jar KDD-Music-Recommender.jar -k N -r <ratingCountThreshold> DATABASE\n"
