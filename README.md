@@ -28,10 +28,10 @@ r is the minimum number of ratings a similarity should have to be valid.
 
 
 Sequential neighborhood generator:
-	KDD-Music-Recommender.jar -k N -r N <database>
+	KDD-Music-Recommender.jar -k N -r N database
 
 MapReduce neighborhood generator:
-	hadoop jar KDD-Music-Recommender.jar -p [-k N] <dirContainingChunks> <output>
+	hadoop jar KDD-Music-Recommender.jar -p [-k N] dirContainingChunks output
 
 Query the neighborhood file:
-	KDD-Music-Recommender.jar -q -t D -n <neighborhoodFile> -u <activeUserFile> <database>
+	KDD-Music-Recommender.jar -q -t D -n neighborhoodFile -u activeUserFile database
