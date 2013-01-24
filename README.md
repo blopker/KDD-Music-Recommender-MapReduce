@@ -1,6 +1,6 @@
 What’s Next? Music Recommendation System
 ========================================
-Karl Bo Lopker, Stephanie Smith, Sarah Jones
+### Karl Bo Lopker, Stephanie Smith, Sarah Jones
 
 Description
 -----------
